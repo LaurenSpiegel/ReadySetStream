@@ -1,0 +1,25 @@
+{
+  "name": "ready-set-stream",
+  "version": "1.0.0",
+  "description": "Node streaming with double buffering",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha --timeout 5500 tests/unit"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/LaurenSpiegel/ReadySetStream.git"
+  },
+  "keywords": [
+    "stream",
+    "double",
+    "buffer",
+    "duplex"
+  ],
+  "author": "Lauren Spiegel",
+  "license": "BSD-3-Clause",
+  "bugs": {
+    "url": "https://github.com/LaurenSpiegel/ReadySetStream/issues"
+  },
+  "homepage": "https://github.com/LaurenSpiegel/ReadySetStream#readme"
+}
