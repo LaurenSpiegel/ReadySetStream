@@ -26,6 +26,11 @@ class MemDuplex extends Duplex {
             this.push(this.buffers[this.cur], 'binary');
             this.cur++;
         }
+        // If do not have new data yet, push empty string
+        if (this.cur >= this.buffers.length &&
+            this.receivedLength < this.totalLength){
+            this.push('');
+        }
         if (this.cur >= this.buffers.length &&
             this.receivedLength >= this.totalLength) {
             this.push(null); // End of buffer
