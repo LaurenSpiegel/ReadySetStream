@@ -72,7 +72,7 @@ exports.readySetStream = function readySetStream(locations, dataRetrievalFn,
                 });
                 memDuplex.on('end', () => {
                     // Move on to the next item(s) or end
-                    process.nextTick(readySetStream, locations,
+                    return process.nextTick(readySetStream, locations,
                         dataRetrievalFn, response, logger);
                 });
             });

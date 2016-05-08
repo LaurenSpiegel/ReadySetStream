@@ -18,7 +18,7 @@ class MemDuplex extends Duplex {
     _write(chunk, enc, cb) {
         assert(Buffer.isBuffer(chunk));
         this.buffers.push(chunk);
-        this.receivedLength += Buffer.byteLength(chunk);
+        this.receivedLength += chunk.length;
         cb();
     }
     _read() {
