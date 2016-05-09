@@ -3,7 +3,6 @@
 const assert = require('assert');
 const stream = require('stream');
 const async = require('async');
-const MemDuplex = require('./MemDuplex.js');
 
 exports.readySetStream = function readySetStream(locations, dataRetrievalFn,
     response, logger) {
@@ -36,10 +35,13 @@ exports.readySetStream = function readySetStream(locations, dataRetrievalFn,
     // Get leading two locations and remove them from locations array
     const leadTwo = locations.splice(0, 2);
     assert(leadTwo[0].key, 'Location does not have a key');
-    // Only need size for part going to memDuplex
-    assert(leadTwo[1].size, 'Size missing for data at given location');
     // Prepare an in-memory duplex stream for the second item in the pair
-    const memDuplex = new MemDuplex(leadTwo[1].size);
+    const memDuplex = new stream.Transform({
+      transform: function(chunk, encoding, next) {
+        this.push(chunk);
+        next();
+      }
+    });
     // Map the two locations to readable streams by opening connections with
     // the data source
     return async.map(leadTwo,
