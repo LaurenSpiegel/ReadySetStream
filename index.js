@@ -40,7 +40,9 @@ exports.readySetStream = function readySetStream(locations, dataRetrievalFn,
       transform: function(chunk, encoding, next) {
         this.push(chunk);
         next();
-      }
+      },
+      // 5MB
+      highWaterMark: 5*1024*1024,
     });
     // Map the two locations to readable streams by opening connections with
     // the data source
