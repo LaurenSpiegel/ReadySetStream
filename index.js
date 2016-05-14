@@ -3,6 +3,7 @@
 const assert = require('assert');
 const stream = require('stream');
 const async = require('async');
+const MemDuplex = require('./MemDuplex.js');
 
 exports.readySetStream = function readySetStream(locations, dataRetrievalFn,
     response, logger) {
@@ -15,13 +16,16 @@ exports.readySetStream = function readySetStream(locations, dataRetrievalFn,
     // If only one item (left), just stream it
     if (locations.length === 1) {
         // If just sent one location, it does not need to have a key attribute
+        // CAN REMOVE THIS ONCE UPDATE S3 BRANCH
         const key = locations[0].key ? locations[0].key : locations[0];
         return dataRetrievalFn(key, logger, (err, readable) => {
             if (err) {
                 logger.error('failed to get full object');
                 return response.socket.end();
             }
-            readable.pipe(response, { end: false });
+            readable.on('data', chunk => {
+                response.write(chunk);
+            });
             readable.on('error', () => {
                 logger.error('error piping data from source');
                 return response.socket.end();
@@ -34,16 +38,8 @@ exports.readySetStream = function readySetStream(locations, dataRetrievalFn,
 
     // Get leading two locations and remove them from locations array
     const leadTwo = locations.splice(0, 2);
-    assert(leadTwo[0].key, 'Location does not have a key');
     // Prepare an in-memory duplex stream for the second item in the pair
-    const memDuplex = new stream.Transform({
-      transform: function(chunk, encoding, next) {
-        this.push(chunk);
-        next();
-      },
-      // 5MB
-      highWaterMark: 5*1024*1024,
-    });
+    const memDuplex = new MemDuplex();
     // Map the two locations to readable streams by opening connections with
     // the data source
     return async.map(leadTwo,
@@ -58,17 +54,20 @@ exports.readySetStream = function readySetStream(locations, dataRetrievalFn,
             }
             const firstReadable = results[0];
             const nextReadable = results[1];
-            // Pipe the lead item directly to the response
-            firstReadable.pipe(response, { end: false });
+            // Write from the lead item directly to the response
+            firstReadable.on('data', chunk => {
+                response.write(chunk);
+            });
             firstReadable.on('error', () => {
                 logger.error('error piping data from source');
                 return response.socket.end();
             });
             firstReadable.on('end', () => {
-                // Pipe from the memDuplex to the
+                // Write from the memDuplex to the
                 // response
-                memDuplex.pipe(response,
-                    { end: false });
+                memDuplex.on('data', chunk => {
+                    response.write(chunk);
+                });
                 memDuplex.on('error', () => {
                     logger.error('error piping ' +
                     'data from in memory duplex');
@@ -87,5 +86,6 @@ exports.readySetStream = function readySetStream(locations, dataRetrievalFn,
             });
         });
 };
+
 
 
