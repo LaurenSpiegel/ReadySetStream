@@ -11,33 +11,20 @@ const Duplex = require('stream').Duplex;
 class MemDuplex extends Duplex {
     constructor() {
         super({ highWaterMark: 8 * 1024 * 1024 });   // 8MB
-        this.buffers = [];
-        this.cur = 0;
         // Once writable stream is finished it will emit a finish
         // event
         this.once('finish', () => {
-            this._read();
+            this.push(null);
         });
     }
     _write(chunk, enc, cb) {
         assert(Buffer.isBuffer(chunk));
-        this.buffers.push(chunk);
-        this._read();
+        this.push(chunk);
         cb();
     }
-    _read() {
-        while (this.cur < this.buffers.length) {
-            this.push(this.buffers[this.cur], 'binary');
-            this.cur++;
-        }
-        // finished is property of writable stream
-        // indicating writing is done.
-        // Once the writing is done and we have pushed
-        // out everything buffered, we're done
-        if (this.cur >= this.buffers.length && this._writableState.finished) {
-            this.push(null); // End of buffer
-        }
-    }
+
+    // _read() function not necessary since pushing
+    // into the readable directly
 }
 
 module.exports = MemDuplex;
