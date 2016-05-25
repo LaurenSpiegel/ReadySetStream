@@ -15,9 +15,7 @@ exports.readySetStream = function readySetStream(locations, dataRetrievalFn,
     }
     // If only one item (left), just stream it
     if (locations.length === 1) {
-        // If just sent one location, it does not need to have a key attribute
-        // CAN REMOVE THIS ONCE UPDATE S3 BRANCH
-        const key = locations[0].key ? locations[0].key : locations[0];
+        const key = locations[0];
         return dataRetrievalFn(key, logger, (err, readable) => {
             if (err) {
                 logger.error('failed to get full object');
@@ -44,7 +42,7 @@ exports.readySetStream = function readySetStream(locations, dataRetrievalFn,
     // the data source
     return async.map(leadTwo,
         function getReadables(item, next) {
-            return dataRetrievalFn(item.key, logger, next);
+            return dataRetrievalFn(item, logger, next);
         },
         function streamIt(err, results) {
             if (err || !results[0] instanceof stream.Readable ||
