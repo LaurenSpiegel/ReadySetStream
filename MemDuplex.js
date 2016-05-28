@@ -27,8 +27,11 @@ class MemDuplex extends Duplex {
     }
     _read() {
         while (this.cur < this.buffers.length) {
-            this.push(this.buffers[this.cur], 'binary');
+            const pushed = this.push(this.buffers[this.cur], 'binary');
             this.cur++;
+            if (!pushed) {
+                break;
+            }
         }
         // finished is property of writable stream
         // indicating writing is done.
