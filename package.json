@@ -21,5 +21,8 @@
   "bugs": {
     "url": "https://github.com/LaurenSpiegel/ReadySetStream/issues"
   },
-  "homepage": "https://github.com/LaurenSpiegel/ReadySetStream#readme"
+  "homepage": "https://github.com/LaurenSpiegel/ReadySetStream#readme",
+  "devDependencies": {
+    "node-mocks-http": "^1.5.2"
+  }
 }
