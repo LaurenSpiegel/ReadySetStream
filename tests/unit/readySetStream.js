@@ -9,10 +9,15 @@ const httpMocks = require('node-mocks-http');
 const proc = require('child_process');
 const readySetStream = require('../../index').readySetStream;
 
-const file10MBData = new Buffer(10485760).fill('Rahul');
-const file20MBData = new Buffer(20971520).fill('Marc');
-const file30MBData = new Buffer(31457280).fill('Rached');
-const file40MBData = new Buffer(41943040).fill('Giorgio');
+
+const b256KB = require("../256KB.js").b256KB;
+const b1MB = Buffer.concat([b256KB, b256KB, b256KB, b256KB]);
+const b10MB = Buffer.concat([b1MB, b1MB, b1MB, b1MB, b1MB, b1MB, b1MB, b1MB, b1MB, b1MB]);
+const file10MBData = b10MB;
+const file20MBData = new Buffer(20971520).fill('**wildcard**');
+const file30MBData = Buffer.concat([b10MB, b10MB, b10MB]);
+const file40MBData = new Buffer(41943040)
+    .fill('Random numbers should not be generated with a method chosen at random.');
 
 const files = {
     file10MB: file10MBData,
