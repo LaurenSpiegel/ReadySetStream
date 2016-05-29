@@ -12,7 +12,6 @@ class MemDuplex extends Duplex {
     constructor() {
         super({ highWaterMark: 8 * 1024 * 1024 });   // 8MB
         this.buffers = [];
-        this.cur = 0;
         // Once writable stream is finished it will emit a finish
         // event
         this.once('finish', () => {
@@ -26,9 +25,8 @@ class MemDuplex extends Duplex {
         cb();
     }
     _read() {
-        while (this.cur < this.buffers.length) {
-            const pushed = this.push(this.buffers[this.cur], 'binary');
-            this.cur++;
+        while (this.buffers.length > 0) {
+            const pushed = this.push(this.buffers.shift(), 'binary');
             if (!pushed) {
                 break;
             }
@@ -37,7 +35,7 @@ class MemDuplex extends Duplex {
         // indicating writing is done.
         // Once the writing is done and we have pushed
         // out everything buffered, we're done
-        if (this.cur >= this.buffers.length && this._writableState.finished) {
+        if (this.buffers.length === 0 && this._writableState.finished) {
             this.push(null); // End of buffer
         }
     }
