@@ -10,6 +10,8 @@ const Duplex = require('stream').Duplex;
  */
 class MemDuplex extends Duplex {
     constructor() {
+        // Piping to the memDuplex will pause if writableBuffer
+        // exceeds this amount
         super({ highWaterMark: 8 * 1024 * 1024 });   // 8MB
         this.buffers = [];
         // Once writable stream is finished it will emit a finish
