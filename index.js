@@ -2,22 +2,37 @@
 
 const MemDuplex = require('./MemDuplex.js');
 
-function _getMore(locations, dataRetrievalFn, logger, memDuplex){
-    return dataRetrievalFn(locations.shift(), logger, (err, readable) => {
+
+function _sendMemDuplexToResponse(memDuplexes, index, response){
+    if(memDuplexes[index] === undefined){
+        return response.end();
+    }
+    const memDuplexOnCall = memDuplexes[index];
+    memDuplexOnCall.on('data', chunk => {
+        response.write(chunk);
+    });
+    memDuplexOnCall.on('error', () => {
+        logger.error('error piping data from source');
+        return response.socket.end();
+    });
+    memDuplexOnCall.on('end', () => {
+        return process.nextTick(_sendMemDuplexToResponse,
+            memDuplexes, index + 1, response);
+    });
+}
+
+function _fillMemDuplex(memDuplexes, index, dataRetrievalFn, logger){
+    return dataRetrievalFn(memDuplexes[index].location, logger, (err, readable) => {
         if(err){
             logger.error('failed to get full object');
             return response.socket.end();
         }
-        if(locations.length >= 1){
-            readable.pipe(memDuplex, {end: false});
+        readable.pipe(memDuplexes[index]);
+        if(memDuplexes[index + 2]){
             readable.on('end', () => {
-                return process.nextTick(_getMore, locations,
-                    dataRetrievalFn, logger, memDuplex);
+                return process.nextTick(_fillMemDuplex, memDuplexes, index + 2,
+                    dataRetrievalFn, logger);
             });
-        } else {
-            // This will call end on writable when done
-            // since no {end: false} parameter
-            readable.pipe(memDuplex);
         }
         readable.on('error', () => {
             logger.error('error piping data from readable to memDuplex');
@@ -34,16 +49,13 @@ exports.readySetStream = function readySetStream(locations, dataRetrievalFn,
     if (locations.length === 0) {
         return response.end();
     }
-    const memDuplex = new MemDuplex();
-    memDuplex.on('data', chunk => {
-        response.write(chunk);
+    const memDuplexes = locations.map((location) => {
+        return new MemDuplex(location);
     });
-    memDuplex.on('error', () => {
-        logger.error('error piping data from source');
-        return response.socket.end();
-    });
-    memDuplex.on('end', () => {
-        return response.end();
-    });
-    return _getMore(locations, dataRetrievalFn, logger, memDuplex);
+
+    _sendMemDuplexToResponse(memDuplexes, 0, response);
+    _fillMemDuplex(memDuplexes, 0, dataRetrievalFn, logger);
+    if (memDuplexes.length > 1){
+        _fillMemDuplex(memDuplexes, 1, dataRetrievalFn, logger);
+    }
 }
