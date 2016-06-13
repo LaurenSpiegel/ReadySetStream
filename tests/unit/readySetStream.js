@@ -147,4 +147,3 @@ describe('readySetStream', () => {
             'file30MB'], done);
     });
 });
-
