@@ -1,6 +1,6 @@
 {
   "name": "ready-set-stream",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Node streaming with double buffering",
   "main": "index.js",
   "scripts": {
