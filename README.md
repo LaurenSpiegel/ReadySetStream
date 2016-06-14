@@ -17,30 +17,32 @@ Installation
 Usage
 ---------------
 
-1) Import the `readySetStream` function into your program:
+First, import the `readySetStream` function into your program:
 
 ```javascript
 import { readySetStream } from 'ready-set-stream';
 ```
 
-2) Call the `readySetStream` function
+Second, call the `readySetStream` function
 with the following arguments:
 
-    a) an array of locations (each location serves as the first argument to your data retrieval function),
-    b) a data retrieval function which takes a location, a logger and a callback as arguments,
-    c) the response object, and
-    d) a logger object (optional)
+    (a) an array of locations (each location serves as the first argument to your data retrieval function),
+    (b) a data retrieval function which takes a location, a logger and a callback as arguments,
+    (c) the response object, and
+    (d) a logger object (optional)
 
 Example
 ---------------
 
 If you would like to stream a number of files in a certain order to a response object simply:
 
-1) Define your locations array with the file paths:
+First, define your locations array with the file paths:
+
 ```javascript
     const locations = ["read me first", "i'm second", "don't forget about me!"];
 ```
-2) Wrap the fs.createReadStream function in a function so that you can send it a location argument, a logger argument and a callback argument.
+
+Second, wrap the fs.createReadStream function in a function so that you can send it a location argument, a logger argument and a callback argument.
 
 ```javascript
 function dataRetrievalFunction(location, logger, callback) {
@@ -48,7 +50,9 @@ function dataRetrievalFunction(location, logger, callback) {
     return callback(null, readStream);
 }
 ```
-3) Call `readySetStream` with your locations array, dataRetrievalFunction and response object as arguments.
+
+Third, call `readySetStream` with your locations array, dataRetrievalFunction and response object as arguments.
+
 ```javascript
 readySetStream(locations, dataRetrievalFunction, response);
 ```
