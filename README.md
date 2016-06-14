@@ -12,7 +12,7 @@ For instance, if data was put via a multipart upload and you have to retrieve al
 Installation
 ------------
 
-    $ npm install -g ready-set-stream
+    $ npm install --save ready-set-stream
 
 Usage
 ---------------
