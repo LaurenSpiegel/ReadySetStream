@@ -23,6 +23,8 @@
   },
   "homepage": "https://github.com/LaurenSpiegel/ReadySetStream#readme",
   "devDependencies": {
+    "async": "^2.0.0-rc.6",
+    "mocha": "^2.5.3",
     "node-mocks-http": "^1.5.2"
   }
 }
