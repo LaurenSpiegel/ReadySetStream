@@ -3,7 +3,7 @@
 const MemDuplex = require('./MemDuplex.js');
 
 
-function _sendMemDuplexToResponse(memDuplexes, index, response){
+function _sendMemDuplexToResponse(memDuplexes, index, response, logger){
     if(memDuplexes[index] === undefined){
         return response.end();
     }
@@ -13,30 +13,31 @@ function _sendMemDuplexToResponse(memDuplexes, index, response){
     });
     memDuplexOnCall.on('error', () => {
         logger.error('error piping data from source');
-        return response.socket.end();
+        return response.end();
     });
     memDuplexOnCall.on('end', () => {
         return process.nextTick(_sendMemDuplexToResponse,
-            memDuplexes, index + 1, response);
+            memDuplexes, index + 1, response, logger);
     });
 }
 
-function _fillMemDuplex(memDuplexes, index, dataRetrievalFn, logger){
-    return dataRetrievalFn(memDuplexes[index].location, logger, (err, readable) => {
+function _fillMemDuplex(memDuplexes, index, dataRetrievalFn, response, logger){
+    return dataRetrievalFn(memDuplexes[index].location, logger,
+        (err, readable) => {
         if(err){
             logger.error('failed to get full object');
-            return response.socket.end();
+            return response.end();
         }
         readable.pipe(memDuplexes[index]);
         if(memDuplexes[index + 2]){
             readable.on('end', () => {
                 return process.nextTick(_fillMemDuplex, memDuplexes, index + 2,
-                    dataRetrievalFn, logger);
+                    dataRetrievalFn, response, logger);
             });
         }
         readable.on('error', () => {
             logger.error('error piping data from readable to memDuplex');
-            return response.socket.end();
+            return response.end();
         });
     });
 }
@@ -53,9 +54,9 @@ exports.readySetStream = function readySetStream(locations, dataRetrievalFn,
         return new MemDuplex(location);
     });
 
-    _sendMemDuplexToResponse(memDuplexes, 0, response);
-    _fillMemDuplex(memDuplexes, 0, dataRetrievalFn, logger);
+    _sendMemDuplexToResponse(memDuplexes, 0, response, logger);
+    _fillMemDuplex(memDuplexes, 0, dataRetrievalFn, response, logger);
     if (memDuplexes.length > 1){
-        _fillMemDuplex(memDuplexes, 1, dataRetrievalFn, logger);
+        _fillMemDuplex(memDuplexes, 1, dataRetrievalFn, response, logger);
     }
 }
