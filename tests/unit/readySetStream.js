@@ -147,3 +147,18 @@ describe('readySetStream', () => {
             'file30MB'], done);
     });
 });
+
+describe('ready set stream errors', () => {
+    it('should end the response if error retrieving data', done => {
+        // No file created to retrieve so will error.
+        // If response.end() is not called, done() will not get called
+        // and test will error due to timeout.
+        const response = httpMocks.createResponse({
+            eventEmitter: EventEmitter,
+        });
+        response.on('end', () => {
+            return done();
+        });
+        readySetStream(['file10MB'], dataRetrieval, response);
+    })
+})
