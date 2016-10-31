@@ -25,8 +25,11 @@ function _fillMemDuplex(memDuplexes, index, dataRetrievalFn, response, logger){
     return dataRetrievalFn(memDuplexes[index].location, logger,
         (err, readable) => {
         if(err){
-            logger.error('failed to get full object');
-            return response.end();
+            logger.error('failed to get full object', {
+                error: err,
+                method: '_fillMemDuplex',
+            });
+            return response.connection.destroy();
         }
         readable.pipe(memDuplexes[index]);
         if(memDuplexes[index + 2]){
@@ -37,7 +40,7 @@ function _fillMemDuplex(memDuplexes, index, dataRetrievalFn, response, logger){
         }
         readable.on('error', () => {
             logger.error('error piping data from readable to memDuplex');
-            return response.end();
+            return response.connection.destroy();
         });
     });
 }
