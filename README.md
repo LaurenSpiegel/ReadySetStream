@@ -30,6 +30,7 @@ with the following arguments:
     (b) a data retrieval function which takes a location, a logger and a callback as arguments,
     (c) the response object, and
     (d) a logger object (optional)
+    (e) an error handling function taking an error object as only argument (optional, default is to call response.connection.destroy() on error)
 
 Example
 ---------------
