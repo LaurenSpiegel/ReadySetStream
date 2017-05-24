@@ -8,7 +8,7 @@ function _sendMemDuplexToResponse(memDuplexes, index, errorHandlerFn,
     if(memDuplexes[index] === undefined){
         return response.end();
     }
-    const memDuplexOnCall = memDuplexes[index];
+    let memDuplexOnCall = memDuplexes[index];
     memDuplexOnCall.on('data', chunk => {
         response.write(chunk);
     });
@@ -17,6 +17,8 @@ function _sendMemDuplexToResponse(memDuplexes, index, errorHandlerFn,
         errorHandlerFn(err);
     });
     memDuplexOnCall.on('end', () => {
+        memDuplexes[index] = undefined;
+        memDuplexOnCall = undefined;
         return process.nextTick(_sendMemDuplexToResponse,
             memDuplexes, index + 1, errorHandlerFn, response, logger);
     });
