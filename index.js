@@ -86,6 +86,9 @@ exports.readySetStream = function readySetStream(locations, dataRetrievalFn,
         console.log("err retrieving!!", err)
         readable.pipe(memDuplexes[0]);
         memDuplexes[0].pipe(response);
+        memDuplexes[0].on('end', () => {
+            memDuplexes = null;
+        });
         // if(memDuplexes[index + 2]){
         //     readable.on('end', () => {
         //         return process.nextTick(_fillMemDuplex, memDuplexes, index + 2,
