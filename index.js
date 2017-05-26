@@ -9,9 +9,6 @@ function _sendMemDuplexToResponse(memDuplexes, index, errorHandlerFn,
         return response.end();
     }
     const memDuplexOnCall = memDuplexes[index];
-    memDuplexOnCall.on('data', chunk => {
-        response.write(chunk);
-    });
     memDuplexOnCall.on('error', err => {
         logger.error('error piping data from source');
         errorHandlerFn(err);
@@ -20,6 +17,7 @@ function _sendMemDuplexToResponse(memDuplexes, index, errorHandlerFn,
         return process.nextTick(_sendMemDuplexToResponse,
             memDuplexes, index + 1, errorHandlerFn, response, logger);
     });
+    memDuplexOnCall.pipe(response, { end: false });
 }
 
 function _fillMemDuplex(memDuplexes, index, dataRetrievalFn, errorHandlerFn,
