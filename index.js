@@ -6,14 +6,17 @@ const MemDuplex = require('./MemDuplex.js');
 function _sendMemDuplexToResponse(memDuplexes, index, errorHandlerFn,
                                   response, logger){
     if(memDuplexes[index] === undefined){
+        memDuplexes = null;
         return response.end();
     }
-    const memDuplexOnCall = memDuplexes[index];
+    let memDuplexOnCall = memDuplexes[index];
     memDuplexOnCall.on('error', err => {
         logger.error('error piping data from source');
         errorHandlerFn(err);
     });
     memDuplexOnCall.on('end', () => {
+        memDuplexes[index] = null;
+        memDuplexOnCall = null;
         return process.nextTick(_sendMemDuplexToResponse,
             memDuplexes, index + 1, errorHandlerFn, response, logger);
     });
