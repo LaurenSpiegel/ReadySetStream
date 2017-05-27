@@ -9,7 +9,7 @@ const PassThrough = require('stream').PassThrough;
  */
 class MemDuplex extends PassThrough {
     constructor(location) {
-        super({ highWaterMark: 8 * 1024 * 1024 });   // 8MB
+        super({ highWaterMark: 2 * 1024 * 1024 });   // 2MB
         this.location = location;
     }
 
